@@ -1,7 +1,5 @@
 streamlit
-openai
 pandas
 pycaret[full]
 python-dotenv
 python-magic
-pydantic==2.8.2
