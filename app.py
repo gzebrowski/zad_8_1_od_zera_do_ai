@@ -58,4 +58,4 @@ with col1:
 with col2:
     st.write('Kraje mające wyższy lub równy happiness_score')
     st.write(df2[df2['happiness_score'] >= predicted_value][['country_name', 'happiness_score']].sort_values(
-        'happiness_score', ascending=False))
+        'happiness_score', ascending=True))
