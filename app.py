@@ -1,7 +1,6 @@
 import pandas as pd
 import streamlit as st
 from pycaret.regression import predict_model
-from pydantic import BaseModel
 
 from app_helpers import slugify
 from pycaret_helper import prepare_regression_model
@@ -20,18 +19,7 @@ df2.set_index('country_name')
 world_happines_model = prepare_regression_model(df2, 'world_happines_regression_pipeline', 'happiness_score')
 
 
-class HapinesParam(BaseModel):
-    gdp: float
-    social_support: float
-    healthy_life_expectancy_at_birth: float
-    freedom_to_make_life_choices: float
-    generosity: float
-    perceptions_of_corruption: float
-    positive_affect: float
-    negative_affect: float
-
-
-fields = list(HapinesParam.model_fields.keys())
+fields = [c for c in new_columns if c not in ['year', 'country_name', 'happiness_score']]
 means = df2[fields].mean().to_dict()
 mins = df2[fields].min().to_dict()
 maxes = df2[fields].max().to_dict()
