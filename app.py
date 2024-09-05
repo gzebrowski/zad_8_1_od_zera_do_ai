@@ -49,6 +49,8 @@ user_values['country_name'] = ''
 ret_val = predict_model(world_happines_model, data=pd.DataFrame([user_values]))
 predicted_value = ret_val.prediction_label[0]
 
+st.write('Wynik:', predicted_value)
+
 col1, col2 = st.columns(2)
 with col1:
     st.write('Kraje mające niższy happiness_score')
