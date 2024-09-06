@@ -16,8 +16,14 @@ descriptions = dict(list(zip(new_columns, columns)))
 df2 = df.copy()[df['year'] == 2023][[c for c in new_columns if c not in ['year']]]
 df2.set_index('country_name')
 
-world_happines_model = prepare_regression_model(df2, 'world_happines_regression_pipeline', 'happiness_score')
 
+@st.cache_resource
+def cache_load_regression_model():
+    dt2 = prepare_regression_model(df2, 'world_happines_regression_pipeline', 'happiness_score')
+    return dt2
+
+
+world_happines_model = cache_load_regression_model()
 
 fields = [c for c in new_columns if c not in ['year', 'country_name', 'happiness_score']]
 means = df2[fields].mean().to_dict()
