@@ -1,0 +1,7 @@
+-r requirements.txt
+
+pycaret[full]
+
+flake8
+isort
+black
