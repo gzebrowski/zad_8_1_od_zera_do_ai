@@ -27,7 +27,9 @@ df.columns = new_columns
 descriptions = dict(list(zip(new_columns, columns)))
 
 df2 = df.copy()[df['year'] == 2023][[c for c in new_columns if c not in ['year']]]
-
+print(df2.columns)
+df2.set_index(['country_name'], inplace=True)
+print(df2.index)
 
 world_happines_model = cache_load_regression_model(df2)
 
@@ -52,10 +54,10 @@ st.write('Wynik:', predicted_value)
 col1, col2 = st.columns(2)
 with col1:
     st.write('Kraje mające niższy happiness_score')
-    st.write(df2[df2['happiness_score'] < predicted_value][['country_name', 'happiness_score']].sort_values(
-        'happiness_score', ascending=False))
+    st.dataframe(df2[df2['happiness_score'] < predicted_value][['happiness_score']].sort_values(
+        'happiness_score', ascending=False), use_container_width=True)
 
 with col2:
     st.write('Kraje mające wyższy lub równy happiness_score')
-    st.write(df2[df2['happiness_score'] >= predicted_value][['country_name', 'happiness_score']].sort_values(
-        'happiness_score', ascending=True))
+    st.dataframe(df2[df2['happiness_score'] >= predicted_value][['happiness_score']].sort_values(
+        'happiness_score', ascending=True), use_container_width=True)
