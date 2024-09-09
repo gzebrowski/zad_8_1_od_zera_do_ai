@@ -39,7 +39,7 @@ maxes = df2[fields].max().to_dict()
 aggr_data = df2[fields].agg(['mean', 'max', 'min']).to_dict()
 
 with st.sidebar:
-    user_values = {'country_name': ''}
+    user_values = {}
     for field in fields:
         user_values[field] = st.slider(descriptions[field], min_value=aggr_data[field]['min'],
                                        max_value=aggr_data[field]['max'], value=aggr_data[field]['mean'])
