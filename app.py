@@ -20,23 +20,24 @@ def cache_load_regression_model(_df):
 
 df = get_data('world-happiness-report.csv')
 
-columns = df.columns
+columns = df.columns.to_list()
 new_columns = list(map(lambda c: slugify(c, '_'), columns))
-df.columns = new_columns
+df2 = df.copy()
+df2.columns = new_columns
 
 descriptions = dict(list(zip(new_columns, columns)))
 
-df2 = df.copy()[df['year'] == 2023][[c for c in new_columns if c not in ['year']]]
-df2.set_index(['country_name'], inplace=True)
+df3 = df2.copy()[df2['year'] == 2023][[c for c in new_columns if c not in ['year']]]
+df3.set_index(['country_name'], inplace=True)
 
-world_happines_model = cache_load_regression_model(df2)
+world_happines_model = cache_load_regression_model(df3)
 
 fields = [c for c in new_columns if c not in ['year', 'country_name', 'happiness_score']]
-means = df2[fields].mean().to_dict()
-mins = df2[fields].min().to_dict()
-maxes = df2[fields].max().to_dict()
+means = df3[fields].mean().to_dict()
+mins = df3[fields].min().to_dict()
+maxes = df3[fields].max().to_dict()
 
-aggr_data = df2[fields].agg(['mean', 'max', 'min']).to_dict()
+aggr_data = df3[fields].agg(['mean', 'max', 'min']).to_dict()
 
 with st.sidebar:
     user_values = {}
@@ -52,10 +53,10 @@ st.write('Wynik:', predicted_value)
 col1, col2 = st.columns(2)
 with col1:
     st.write('Kraje mające niższy happiness_score')
-    st.dataframe(df2[df2['happiness_score'] < predicted_value][['happiness_score']].sort_values(
+    st.dataframe(df3[df3['happiness_score'] < predicted_value][['happiness_score']].sort_values(
         'happiness_score', ascending=False), use_container_width=True)
 
 with col2:
     st.write('Kraje mające wyższy lub równy happiness_score')
-    st.dataframe(df2[df2['happiness_score'] >= predicted_value][['happiness_score']].sort_values(
+    st.dataframe(df3[df3['happiness_score'] >= predicted_value][['happiness_score']].sort_values(
         'happiness_score', ascending=True), use_container_width=True)
