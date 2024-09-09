@@ -5,25 +5,31 @@ from pycaret.regression import predict_model
 from app_helpers import slugify
 from pycaret_helper import prepare_regression_model
 
-df = pd.read_csv('world-happiness-report.csv')
+
+@st.cache_resource
+def get_data(filename):
+    return pd.read_csv(filename)
+
+
+@st.cache_resource
+def cache_load_regression_model(_df):
+    dt2 = prepare_regression_model(_df, 'world_happines_regression_pipeline', 'happiness_score',
+                                   ignore_features=['country_name'])
+    return dt2
+
+
+df = get_data('world-happiness-report.csv')
 
 columns = df.columns
-new_columns = [slugify(c, '_') for c in columns]
+new_columns = list(map(lambda c: slugify(c, '_'), columns))
 df.columns = new_columns
 
 descriptions = dict(list(zip(new_columns, columns)))
 
 df2 = df.copy()[df['year'] == 2023][[c for c in new_columns if c not in ['year']]]
-df2.set_index('country_name')
 
 
-@st.cache_resource
-def cache_load_regression_model():
-    dt2 = prepare_regression_model(df2, 'world_happines_regression_pipeline', 'happiness_score')
-    return dt2
-
-
-world_happines_model = cache_load_regression_model()
+world_happines_model = cache_load_regression_model(df2)
 
 fields = [c for c in new_columns if c not in ['year', 'country_name', 'happiness_score']]
 means = df2[fields].mean().to_dict()
@@ -33,13 +39,11 @@ maxes = df2[fields].max().to_dict()
 aggr_data = df2[fields].agg(['mean', 'max', 'min']).to_dict()
 
 with st.sidebar:
-    user_values = {}
+    user_values = {'country_name': ''}
     for field in fields:
         user_values[field] = st.slider(descriptions[field], min_value=aggr_data[field]['min'],
                                        max_value=aggr_data[field]['max'], value=aggr_data[field]['mean'])
 
-user_values['country_name'] = ''
-# hp_p = HapinesParam(**user_values)
 ret_val = predict_model(world_happines_model, data=pd.DataFrame([user_values]))
 predicted_value = ret_val.prediction_label[0]
 
