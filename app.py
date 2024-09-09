@@ -27,9 +27,7 @@ df.columns = new_columns
 descriptions = dict(list(zip(new_columns, columns)))
 
 df2 = df.copy()[df['year'] == 2023][[c for c in new_columns if c not in ['year']]]
-print(df2.columns)
 df2.set_index(['country_name'], inplace=True)
-print(df2.index)
 
 world_happines_model = cache_load_regression_model(df2)
 
