@@ -1,6 +1,9 @@
+import matplotlib as mpl
 import pandas as pd
 import streamlit as st
 from pycaret.regression import load_model, predict_model
+
+plt = mpl.pyplot
 
 
 @st.cache_resource
@@ -26,25 +29,38 @@ df = get_dataframe('world-happiness-report_2023.csv')
 fields, aggr_data = get_data(df)
 world_happines_model = cache_load_regression_model()
 
+tab1, tab2 = st.tabs(['Predykcja', 'Eksploracja danych'])
 
-with st.sidebar:
-    user_values = {}
-    for field in fields:
-        user_values[field] = st.slider(field.replace('_', ' ').capitalize(), min_value=aggr_data[field]['min'],
-                                       max_value=aggr_data[field]['max'], value=aggr_data[field]['mean'])
+with tab1:
+    with st.sidebar:
+        user_values = {}
+        for field in fields:
+            user_values[field] = st.slider(field.replace('_', ' ').capitalize(), min_value=aggr_data[field]['min'],
+                                           max_value=aggr_data[field]['max'], value=aggr_data[field]['mean'])
 
-ret_val = predict_model(world_happines_model, data=pd.DataFrame([user_values]))
-predicted_value = ret_val.prediction_label[0]
+    ret_val = predict_model(world_happines_model, data=pd.DataFrame([user_values]))
+    predicted_value = ret_val.prediction_label[0]
 
-st.write('Wynik:', predicted_value)
+    st.write('Wynik:', predicted_value)
 
-col1, col2 = st.columns(2)
-with col1:
-    st.write('Kraje mające niższy happiness_score')
-    st.dataframe(df[df['happiness_score'] < predicted_value][['happiness_score']].sort_values(
-        'happiness_score', ascending=False), use_container_width=True)
+    col1, col2 = st.columns(2)
+    with col1:
+        st.write('Kraje mające niższy happiness_score')
+        st.dataframe(df[df['happiness_score'] < predicted_value][['happiness_score']].sort_values(
+            'happiness_score', ascending=False), use_container_width=True)
 
-with col2:
-    st.write('Kraje mające wyższy lub równy happiness_score')
-    st.dataframe(df[df['happiness_score'] >= predicted_value][['happiness_score']].sort_values(
-        'happiness_score', ascending=True), use_container_width=True)
+    with col2:
+        st.write('Kraje mające wyższy lub równy happiness_score')
+        st.dataframe(df[df['happiness_score'] >= predicted_value][['happiness_score']].sort_values(
+            'happiness_score', ascending=True), use_container_width=True)
+
+    fig, ax = plt.subplots()
+    ax.hist(df['happiness_score'], bins=40)
+    ymin, ymax = ax.get_ybound()
+    ax.set_xlabel('Happines score')
+    ax.set_ylabel('Count')
+    ax.vlines(predicted_value, ymin, ymax, color='red')
+    st.pyplot(fig)
+
+with tab2:
+    st.dataframe(df)
